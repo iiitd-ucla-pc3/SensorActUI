@@ -1,0 +1,677 @@
+<!DOCTYPE html> <!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+	<!--<![endif]-->
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<title> Display </title>
+		<link rel="shortcut icon" href="@{'/public/images/favicon.png'}" type="image/x-icon">
+		<link rel="stylesheet" type="text/css" href="@{'/public/stylesheets/style.css'}">
+		<link rel="stylesheet" type="text/css" href="@{'/public/stylesheets/jquery-ui-1.8.21.custom.css'}">
+		<link rel="stylesheet" type="text/css" href="@{'/public/stylesheets/jquery-ui-timepicker-addon.css'}">
+
+		<!--<link rel="stylesheet" type="text/css" href="@{'/public/stylesheets/styles_non_centered.css'}">-->
+		<link rel="stylesheet" type="text/css" href="@{'/public/stylesheets/jquery.noty.css'}">
+		<link rel="stylesheet" type="text/css" href="@{'/public/stylesheets/noty_theme_twitter.css'}">
+
+
+		<link rel="stylesheet" href="@{'/public/stylesheets/bootstrap.min.css'}" type="text/css" media="screen">		
+ 
+		<link rel="stylesheet" href="@{'/public/stylesheets/font-awesome-4.0.3/css/font-awesome.min.css'}" type="text/css" media="screen">
+		
+		<!-- 
+		<link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+		 -->
+		 
+		<script src="@{'/public/javascripts/jstree/libs/jquery.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+		<script src="@{'/public/js/libs/modernizr-2.0.6.min.js'}"></script>		
+		
+		<!-- 
+		<script src="@{'/public/javascripts/jquery-1.6.4.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+		 -->
+		
+		<script src="@{'/public/javascripts/jquery.noty.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+		<script src="@{'/public/javascripts/jquery-ui-1.10.3.custom.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+		<!-- 
+		<script src="@{'/public/javascripts/highcharts.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+		 -->
+		<script src="@{'/public/javascripts/constants.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+		<script src="@{'/public/javascripts/utilityFunctions.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+		<script src="@{'/public/javascripts/exporting.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+		<script src="@{'/public/javascripts/jquery-ui-timepicker-addon.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+		
+		
+		<script src="http://code.highcharts.com/stock/highstock.js"></script>
+		<script src="http://code.highcharts.com/stock/modules/exporting.js"></script>
+		
+
+		<link rel="stylesheet" type="text/css" href="@{'/public/javascripts/jstree/themes/default/style.min.css'}">		
+		<script src="@{'/public/javascripts/jstree/jstree.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+
+		<!--Google API-->
+		<!--<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDDZ2cfkjgRuqcVocQt_xt4esmqpNQT3KM&sensor=false"></script>-->
+		<!--Google API-->
+
+		<script type="text/javascript">
+			$(document).ready(function() {
+
+				createHeader();
+				createFooter();
+
+				$(".errorVisual").hide();
+				$("#labelSensorSelect").hide();
+		
+				//$("#resizer").hide();
+				//$("#imageDiv").hide();
+				//$("#csvDiv").hide();
+				//$("#tools").hide();
+
+				jQuery.ajaxSetup({
+					async : false
+				});
+				/*
+				* Global variables and settings
+				*/
+
+				//Setting the charting library to use local time
+				Highcharts.setOptions({
+					global : {
+						useUTC : false
+					}
+				});
+
+	
+				$('#visualFunctions1').resizable({
+					// On resize, set the chart size to that of the
+					// resizer minus padding. If your chart has a lot of data or other
+					// content, the redrawing might be slow. In that case, we recommend
+					// that you use the 'stop' event instead of 'resize'.
+					resize : function() {
+						//chart.setSize(this.offsetWidth - 20, this.offsetHeight - 20, false);
+					}
+				});
+			
+				function alertAddError(errorInformation) {
+					$("#errorDiv").html(errorInformation);
+					$("#errorDiv").fadeIn('slow');
+					return false;
+				}			
+
+				
+		//*****************************************Chart*****************************************************/
+				$("#container").hide();
+				//var container = $('#container');
+				var series = new Array();
+				//var chart;
+				function createChart(seriesData) {					
+					 //$('#container').highcharts({
+					//chart = new Highcharts.StockChart(chartoptions);
+					$('#container').highcharts('StockChart',{
+						chart : {
+							//renderTo : 'container',
+							type : 'line',
+							marginRight : 10,
+							marginBottom : 50,
+							//marginTop : -50,
+							useUTC : false,
+							zoomType : 'x',
+							events : {
+							}
+						},
+						title : {
+							text : '.',
+							x : -20 //center
+						},
+						subtitle : {
+							text : '',
+							x : -20
+						},
+						xAxis : {
+							type : 'datetime',
+			                ordinal :false
+						},
+						plotOptions : {
+							line : {
+								lineWidth: 1,
+								marker : {
+									enabled : false
+								}
+							}
+						},
+					    rangeSelector: {
+					        buttons: [{
+				            	type: 'minute',
+				            	count: 10,
+				            	text: '10m'
+				        	}, {
+				            	type: 'minute',
+				            	count: 30,
+				            	text: '30m'
+				        	}, {
+				            	type: 'hour',
+				            	count: 1,
+				            	text: '1h'
+				        	}, {
+				            	type: 'hour',
+				            	count: 6,
+				            	text: '6h'
+				        	}, {
+				            	type: 'day',
+				            	count: 1,
+				            	text: '1d'
+				        	}, {
+					            type: 'day',
+					            count: 3,
+					            text: '3d'
+					        }, {
+					            type: 'week',
+					            count: 1,
+					            text: '1w'
+					        }, {
+					            type: 'all',
+					            text: 'All'
+					        }],
+					        selected: 3
+					    },
+						yAxis : {
+							title : {
+								text : 'Readings'
+							},
+							plotLines : [{
+								value : 0,
+								width : 1,
+								color : '#808080',
+								line : {
+									marker : {
+										enabled : true
+									}
+								}
+							}]
+						},
+						tooltip : {/*
+							formatter : function() {
+								//return '<b>' + this.series.name + '</b><br/>' + Highcharts.dateFormat('%e%b', this.x) + ': ' + this.y;
+								return Highcharts.dateFormat('%e%b', this.x) + ': ' + this.y;
+							}*/
+						},
+						credits : {
+							enabled : false
+						},
+						legend : {
+							enabled: true,
+							layout : 'horizontal',
+							align : 'center',
+							//verticalAlign : 'top',
+							//x : 0,
+							//y : 100,
+							borderWidth : 0
+						},
+						series : seriesData
+					});
+				}
+				//createChart();
+				///asdf}asdfas
+	//*****************************************Chart*****************************************************/
+
+				//Setting the correct datetime format to start and end time dialog
+				
+				createDateTimePicker(ID_START_DATE_TIME_DISPLAY);
+				createDateTimePicker(ID_END_DATE_TIME_DISPLAY);
+				/*$(ID_START_DATE_TIME_DISPLAY).datetimepicker({
+					changeMonth : true,
+					changeYear : true,
+					dateFormat : "yy-mm-dd",
+					separator : "-"
+				});
+
+				$(ID_END_DATE_TIME_DISPLAY).datetimepicker({
+					changeMonth : true,
+					changeYear : true,
+					dateFormat : "yy-mm-dd",
+					separator : "-"
+				});*/
+
+				var startTime;
+				var endTime;
+				var receivedData={};
+				var errorState;
+				var errorInformation;
+				var query;
+				var username = $("#username").val();
+				var secretkey = FAKE_SECRET_KEY;
+				var receivedDeviceData = {}; //ListofDevices Received
+				var motionCounter; //Total Count of the Motion
+				var motionInterval;//To SetTimeInterval
+				var motionStatus = true;
+				var SPEED = 1;//Speed if Motion Display in ON
+				var minTimeStamp = -1;// To calculate the min & max timestamp
+				var maxTimeStamp = -1; //to set Window Size when Motion Display
+				var WINDOW_SIZE = $("#windowSize").val();
+				var motionType = $("#motionType").is(':checked');
+				//var library = $("#selectLibrary").val(); 
+				var library="highcharts";
+				var map;
+				var line;
+				var newPath = new Array(); //For Google Maps Polyline Path
+				var tempPath = new Array();//Temporary variable to store path
+				var motionMarker; // Markers to be placed on GMaps
+				var overlays = []; // All overlays items to be stored in it
+				var downloadData = new Array(); // Received Data is stored
+				var statsData = ""; //Statistics Data
+				var interactive; 
+
+
+				/*
+				* Description:This function takes the device name,selected set of sensors and start
+				* and end time and for each sensor makes a request to the Server to fetch the data
+				* It also calls the function appendElementToSeries which for each Sensor adds it to
+				* the charting library
+				*
+				* I/P:
+				* 1.Name of device
+				* 2.Array Of Selected Sensors
+				* 3.Start Time					//$.get("http://www.google.com" + "?secretkey=" + secretkey, function(data){
+
+				* 4.End Time
+				*
+				* O/P:
+				* 1.AJAX POST to UI Server+Adding the new series to the chart
+				*/
+				function makeRequestAndDisplayChartNew(selectedChannels, startTime, endTime) {
+					
+					statsData = "";
+					var query = {};
+					query[QUERY_CONDITIONS] = {};
+					query[QUERY_CONDITIONS][QUERY_CONDITIONS_FROM_TIME] = startTime;
+					query[QUERY_CONDITIONS][QUERY_CONDITIONS_TO_TIME] = endTime;
+					query[QUERY_USER_NAME] = username;
+					query[QUERY_IS_INTERACTIVE] = interactive;
+					var mode=interactive=="true"?"interactive":"non interactive";
+					var r =showNoty("Chart Loading in "+mode + " mode", "center", "off",500);
+					query[QUERY_DEVICE_ARRAY] = new Array();
+					
+					var i = 0;
+					for (chIndex in selectedChannels) {
+						query[QUERY_DEVICE_ARRAY][i] = selectedChannels[chIndex]; 
+						i++;
+					}
+					
+					try {
+						var receivedData = null; 
+						$.post(URL_UI_SERVER+"querydatanew", JSON.stringify(query), 
+							function(data) {
+								receivedData = data;
+							})
+							.error(function(error){
+								//alert("error " + error)
+								$.noty.closeAll();
+								var r = showNoty("<h2> Error occured while fetching data from server</h2>" , "center", "off",3000);
+							});
+						
+						if (receivedData != null && 
+								!(receivedData.hasOwnProperty(RESPONSE_STATUS_CODE))) {
+							if(receivedData=="No Data Found") {	
+								$.noty.closeAll();
+								showNoty("No Data Found", "center", "off",3000);
+							} else {							
+								$.noty.closeAll();
+								$("#container").show();
+								downloadData.push(receivedData);					
+								series = appendElementsToSeries(series, receivedData);
+							}						
+						} 
+					} catch(e) {
+						$.noty.closeAll();
+						var r = showNoty("<h2> Error occured: \n" + e + "\n</h2>" , "center", "off",3000);
+					}
+				}
+
+				/* ............................. NEW ..................................*/
+				function validatePlotData(startTime, endTime) {
+					
+					var errorState = false;
+					if (startTime.length == 0) {
+						errorState = true;			
+						//$("#start_date_time").addClass("error");
+						//$("#spanStartTime").show('slow', function() {
+						//});
+						//$("#spanStartTime").html("Please select Start Time");						
+						$.noty.closeAll();
+						showNoty("<h2> Select start time</h2>", "center", "off", 3000);
+						
+					} else if (endTime.length == 0) {
+						errorState = true;						
+						//$("#end_date_time").addClass("error");
+						//$("#spanEndTime").show('slow', function() {
+						//});
+						//$("#spanEndTime").html("Please select End Time");
+						$.noty.closeAll();
+						showNoty("<h2>Select end time</h2>", "center", "off", 3000);
+
+					} else if (startTime >= endTime) {
+						errorState = true;						
+						//$("#spanEndTime").show('slow', function() {
+						//});
+						//$("#spanEndTime").html("Start Time should be less than end time");
+						$.noty.closeAll();
+						showNoty("<h2>Start Time should be before than end time</h2>", "center", "off", 3000);
+					}
+					return errorState;
+				}
+				
+				$("#btnPlotData").click(function() {
+					plotData();
+				});
+				
+				function plotData() {
+					//alert("button")
+					if ($(ID_START_DATE_TIME_DISPLAY).val().length > 0) {
+						startTime = datetimeToEpoch($(ID_START_DATE_TIME_DISPLAY).val());
+					} else {
+						startTime = $(ID_START_DATE_TIME_DISPLAY).val();
+					}
+					if ($(ID_END_DATE_TIME_DISPLAY).val().length > 0) {
+						endTime = datetimeToEpoch($(ID_END_DATE_TIME_DISPLAY).val());
+					} else {
+						endTime = $(ID_END_DATE_TIME_DISPLAY).val();
+					}
+
+					if(validatePlotData(startTime, endTime) == true) {
+						return;
+					}
+					
+					var selectedChannels = $('#jstree2').jstree(true).get_selected(full=true);
+					//console.log(JSON.stringify(selectedChannels));
+					//alert(selectedChannels.length)
+					
+					if(selectedChannels.length == 0) {
+						$.noty.closeAll();
+						showNoty("<h2>Select channels</h2>", "center", "off", 3000);
+						return;
+					}
+					
+					
+					if(selectedChannels.length > 5) {
+						$.noty.closeAll();
+						showNoty("<h2>Maximum of 5 channels allowed for plotting</h2>", "center", "off", 3000);
+						return;
+					}
+
+					//Now for each sensor in the selectedSensorList we would make a query and fetch the data and draw chart
+					//makeRequestAndDisplayChart(selectedDeviceName, selectedSensorArray, startTime, endTime);
+					
+					channelList = Array();
+					// navigate through the list and get its sensor and device name
+					for (chIndex in selectedChannels) {
+						channelObj = selectedChannels[chIndex];
+						console.log(channelObj["parents"])
+						sensorObj = $('#jstree2').jstree(true).get_node(channelObj["parents"][0]);
+						deviceObj = $('#jstree2').jstree(true).get_node(channelObj["parents"][1]);						
+						chNode = {};
+						chNode.channel = channelObj["text"]						
+						chNode.sensor = sensorObj["text"]
+						chNode.device = deviceObj["text"]
+						channelList.push(chNode);
+						//alert(JSON.stringify(sensorObj))
+					}
+					console.log(JSON.stringify(channelList))
+					makeRequestAndDisplayChartNew(channelList, startTime, endTime);					
+				}
+				
+				var node = {};
+				node.id = 2
+				node.label = "node1"
+				node.inode = false;
+				
+				var branch1 = {};
+				branch1.id = 1;
+				branch1.label = "node1";
+				branch1.inode = true;
+				branch1.checkbox = true;
+				branch1.branch = Array()
+				branch1.branch.push(node)
+				
+				acitreeData = Array();
+				//acitreeData.push(branch1);
+				acitreeData.push(branch1);
+				
+				console.log(JSON.stringify(acitreeData))
+				jsonData = JSON.stringify(acitreeData)
+				
+				//dd = $('#acitree')
+				//console.log(dd)
+				
+				treeJson = Array();
+				var nid = 1;
+				
+	//			$('#jstree1').jstree();
+
+					//Getting Device List
+				try {
+					$.get(URL_UI_SERVER+URL_LIST_ALL_DEVICES, function(data) {					
+						receivedDeviceData = data;
+					});
+				} catch(e) {
+				}
+				
+				// @samy
+				//Make a get request to get all the devices available
+				if (!(receivedDeviceData.hasOwnProperty(RESPONSE_STATUS_CODE)))//Success
+				{
+					//alert(JSON.stringify(receivedDeviceData));
+					if (receivedDeviceData[DEVICE_ARRAY].length > 0) {
+						for (var index in receivedDeviceData[DEVICE_ARRAY]) {						
+							var device = receivedDeviceData[DEVICE_ARRAY][index];
+							console.log(device[DEVICE_NAME])							
+								node = {};
+								node.id = nid + ""
+								node.parent = "#"
+								node.text = device[DEVICE_NAME]
+								node.icon = "fa fa-sitemap fa-lg"
+								treeJson.push(node);								
+								did = nid;
+								nid++;								
+							var sensorList = device[DEVICE_SENSORS];
+							for (var sindex in sensorList) {
+								sensor = sensorList[sindex];
+								node = {};
+								node.id = nid + ""
+								node.parent = did+"";
+								node.text = sensor[DEVICE_SENSOR_NAME]
+								node.icon = "glyphicon glyphicon-filter fa-lg"
+								treeJson.push(node);								
+								sid = nid;
+								nid++;								
+								var channelList = sensor[DEVICE_CHANNELS];
+								for (var cindex in channelList) {
+									channel = channelList[cindex];
+									node = {};
+									node.id = nid + ""
+									node.parent = sid+"";
+									node.text = channel[DEVICE_SENSOR_CHANNEL_NAME]
+									node.icon = "fa fa-bar-chart-o fa-lg"
+									//node.state = {selected: true}
+									treeJson.push(node);
+									nid++;
+								} // channel list
+							} // sensor list
+						} // device list
+					}
+				}
+				
+				//console.log(JSON.stringify(treeJson))
+				
+				$('#jstree2').jstree({
+					"core" : {
+						"data" : treeJson,
+						"theme" : { 
+							"variant" : "large"
+						}
+					},
+					"checkbox" : {
+						"keep_selected_style" : true
+					},
+					"plugins" : ["checkbox", "sort" ]
+				});
+				
+				var s = $('#jstree2').jstree(true).get_selected(full=true);
+				console.log(JSON.stringify(s))
+				
+				var treee = $('#jstree2').jstree(true);
+				
+				$("#jstree2").delegate("a","dblclick", function(e) {
+					  var idn = $(this).parent().attr("id")
+					  //alert(idn); //return NodeID    
+				});
+			
+				
+				$("#jstree2").delegate("a","dblclick", function(e) {
+					  $('#jstree2').jstree(true).deselect_all(true)
+					  $('#jstree2').jstree(true).select_node($(this));
+					  
+					  plotData();
+					  
+					  // TODO:  
+					  ch = $(this).children();					  
+					  //alert(ch);
+					  // if its a leaf node
+					  if($(this).children.length == 0 ){
+						//  plotData();
+					  }
+						console.log($(this))
+
+				});
+				
+
+				/*
+				 * Description:This function$(#IDSensorsSelect").append("<span class='errorVisual' id='spanSensor'></span>"); is used to append series to the chart
+				 *
+				 * I/P:Response to the query to view data which is of the form of
+				 * SAMPLE_QUERY_DATA_QUERY_RESPONSE in constants.js
+				 *
+				 *
+				 */
+				function appendElementsToSeries(series, receivedData) {
+					//seris = receivedData["chartSeries"];
+					
+					$("#container").show();
+					//Empty the previous entries
+					//while (chart.series.length > 0) {
+						//console.log(chart.series[0]);
+						//chart.series[0].remove();
+						//console.log('#series ' + chart.series.length)
+					//}//CLearing data from previous calls
+					seriesData = new Array();
+					var numberOfSeries = receivedData["chartSeries"].length;
+					for (var i = 0; i < numberOfSeries; i++) {
+						//chart.addSeries(receivedData["chartSeries"][i]);
+						//chart.serie[i].setData(receivedData["chartSeries"][i],true);						
+						seriesData.push(receivedData["chartSeries"][i]);
+						console.log("adding series " + i + " " + receivedData["chartSeries"][i]['name']);
+					}
+					console.log(seriesData)
+					createChart(seriesData);
+					//chart.redraw();					
+					//return series;
+				}
+			});
+
+		</script>
+	</head>
+	<body>
+
+		<div id="header-container">
+			<header class="wrapper clearfix">
+				<h1 id="title">SensorAct
+				<br />
+				<br />
+				<span style="font-size:25px;">Sense - Interact - Actuate</span></h1>
+				<nav id="navHeader">					
+				</nav>
+				<br />
+				<br />
+				<nav>
+					<p class="pbox" style="margin-bottom:-20px;"> Welcome ${username} &nbsp | &nbsp
+						<span id="viewkey">View API key</span> &nbsp; | 
+						&nbsp<span id="logout">Logout</span>
+					</p>
+				</nav>
+
+			</header>
+		</div>
+		<div class="wrapper" style="width: 95%;">
+			
+			<p class="space"></p>
+			<div id="selectedVPDS" style="float:right; font-size: 12px"><b>Selected VPDS:</b><label id="labelVpdsname"></label></div>
+			<br/>
+			<hr>
+						
+			<!-- 
+			<div style="display: inline;" id="errorDiv" class="errorDiv"></div>
+			 -->
+								
+			<!-- Left Pane starts here-->
+			<div id="visualBox" class="well well-sm" style="width: 300px; height: 500px; padding: 0px">
+			  
+				<div class="leftDiv">					
+				</div>
+				
+				<div class="leftDiv">
+					<label>Select channel:</label>
+				</div>				
+				<div id="jstree2" class="well  well-sm" 
+						style="overflow: auto; width: 300px; height: 475px; padding: 0px">
+				</div>
+			</div>
+			<!-- Left pane ends here -->
+
+			<!--Right Pane starts here  style="float:right;" -->
+			<div id="visualBox1" class = "well well-sm" 
+				style="float:left; width: 75%; height: 500px; padding: 5px">
+				<div class="row" style="padding: 5px">
+  					<div class="col-sm-2">
+      					<input type="text" id="start_date_time" name="start_date_time" 
+      						class="form-control  input-sm" placeholder="Start time"/>
+  					</div><!-- /.col-sm-3 -->
+  					<div class="col-sm-2">
+						<input type="text" id ="end_date_time" name="end_date_time" 
+							class="form-control input-sm" placeholder="End time"/>
+  					</div><!-- /.col-sm-3 -->
+					<div class="col-sm-2">
+						<button id="btnPlotData" class="btn btn-sm btn-primary" type="button">
+			  				Plot data
+						</button>			
+					</div>
+				</div><!-- /.row -->
+
+				<div class="" style="padding: 0px">
+					<span class="errorVisual" id="spanStartTime"></span>										
+					<span class="errorVisual" id="spanEndTime"></span>																		
+				</div>
+					<div id="container" class="well well-sm" 
+						style="height: 450px; width: 100%; padding: 0px" >
+					</div>					
+			</div>
+			<!-- Right Pane ends here-->			
+			<input type="hidden" id ="username" value =${username} />
+		</div>
+
+		<hr>
+		</div>
+		<div id="iFields">
+			<input id="username"  type="hidden" value=${username}> 
+			<input id="usertype"  type="hidden" value=${usertype}> 
+			<input id="vpdsname"  type="hidden" value=${vpdsname}> 
+			<input id="vpdsurl"  type="hidden" value=${vpdsurl}>
+			<input id="vpdskey"  type="hidden" value=${vpdskey}>
+		</div>
+
+		<div style="clear:both;" id="footer-container">
+		</div>
+
+	</body>
+
+</html>

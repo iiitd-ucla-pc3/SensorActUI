@@ -1,0 +1,103 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET     /                                       Application.index
+GET		/getsecretkey							Application.getsecretkey
+GET		/getVPDSInfo							Application.getVPDSInfo
+GET     /relogin								Application.relogin
+POST	/opclassifier							Application.opclassifier
+
+GET     /display                                Application.display
+GET     /display2                               Application.display2
+GET     /login									Application.login
+POST    /login                                  Application.login
+POST    /register                               Application.registeruser
+POST    /listallusers                           Application.listallusers
+GET     /home									Application.home
+GET     /homeuser								Application.homeuser
+GET     /homevo									Application.homevo
+GET     /managehome								Application.managehome
+GET     /logout                                 Application.logout
+
+GET     /registervpds							Application.registervpds
+POST    /registerVPDSToBroker					Application.registerVPDSToBroker
+
+GET     /sharedevices							Application.sharedevices
+GET		/useractuate							Application.useractuate
+GET		/userpresenceactuate					Application.userpresenceactuate
+GET     /userdisplay                            Application.userdisplay
+
+GET     /share									Application.share
+GET     /getuserlist							Application.getuserlist
+POST	/sharedevice							Application.sharedevice
+POST	/viewsharedevices						Application.viewsharedevices
+POST	/listsharedevices						Application.listsharedevices
+
+GET     /managevpds								Application.managevpds
+POST	/getvpdsdetails							Application.getvpdsdetails
+POST	/listvpds								Application.listvpds
+
+GET     /device                                 Application.device
+GET     /device2                                Application.device2
+POST    /adddevice                              Application.adddevice
+POST    /adddevicetemplate                      Application.adddevicetemplate
+POST    /deletedevice                           Application.deletedevice
+POST    /deletedevicetemplate                   Application.deletedevicetemplate
+POST	/getdevice								Application.getdevice
+GET     /listalldevices							Application.listalldevices
+GET     /listalldevicetemplates					Application.listalldevicetemplates
+
+POST	/listallvpdsdevices						Application.listallvpdsdevices
+
+GET		/actuate								Application.actuate
+GET		/presenceactuate						Application.presenceactuate
+POST	/actuatedevice							Application.actuatedevice
+POST	/listactuationrequests					Application.listactuationrequests
+POST	/cancelactuationrequests				Application.cancelactuationrequests
+
+GET		/createtasklet							Application.createtasklet
+POST	/listasklet								Application.listasklet
+
+GET		/guardrule								Application.guardrule
+POST	/addguardrule							Application.addGuardRule
+POST	/delguardrule							Application.delGuardRule
+POST	/getguardrule							Application.getGuardRule
+GET     /listallguardrules						Application.listallguardrules
+GET     /editguardrule/{guardrulename}/{mode}	Application.editguardrule
+
+POST	/addassocguardrule						Application.addAssocGuardRule
+POST	/delassocguardrule						Application.delAssocGuardRule
+POST	/getassocguardrule						Application.getAssocGuardRule
+GET     /listassocguardrules					Application.listassocguardrules
+GET     /assocguardrule/{guardrulename}/{mode} 	Application.assocguardrule
+
+
+POST    /querydatanew                           Application.querydatanew
+
+POST    /querydata                              Application.querydata
+POST	/downloadata							Application.downloadata
+
+#Unused
+POST    /querydata2                             Application.querydata
+GET     /speak									Application.speak
+POST    /speak									Application.speak
+
+GET     /repository							 		 Application.repository
+GET     /getrepositoryinfo							 Application.getrepositoryinfo
+POST    /generatesecretkey							 Application.generatesecretkey
+GET     /editdevice/{devicename}/{isdevice}/{mode}   Application.editdevice
+POST    /finddevice                                  Application.finddevice
+POST    /finddevicetemplate                          Application.finddevicetemplate
+POST	/soundinput/{userID}						 Application.soundinput
+
+
+# Ignore favicon requests
+GET     /favicon.ico                            404
+
+# Map static resources from the /app/public folder to the /public path
+GET     /public/                                staticDir:public
+
+# Catch all
+*       /.*										Application.index

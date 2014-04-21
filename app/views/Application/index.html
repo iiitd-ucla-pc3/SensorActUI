@@ -1,0 +1,321 @@
+<!doctype html> <!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+	<!--<![endif]-->
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<title> SensorAct </title>
+		<link rel="stylesheet" type="text/css" href="@{'/public/stylesheets/style.css'}">
+		<link rel="stylesheet" type="text/css" href="@{'/public/stylesheets/jquery.noty.css'}">
+		<link rel="stylesheet" type="text/css" href="@{'/public/stylesheets/noty_theme_twitter.css'}">
+		<script src="@{'/public/js/libs/modernizr-2.0.6.min.js'}"></script>
+		<script src="@{'/public/javascripts/jquery-1.6.4.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+		<script src="@{'/public/javascripts/jquery.noty.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+		<script src="@{'/public/javascripts/constants.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+		<script src="@{'/public/javascripts/utilityFunctions.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+		<script type="text/javascript">
+			$(document).ready(function() {
+
+				var sign_in_username;
+				var sign_in_password;
+				var sign_in_validation_state = false;
+				var sign_up_username;
+				var sign_up_password;
+				var sign_up_confirmation;
+				var sign_up_email;
+				var sign_up_validation_state = false;
+				var responseFromServer = {};
+				var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+				//Setting up in async mode
+				jQuery.ajaxSetup({
+					async : false
+				});
+				//Hide all forms
+				//$(".forms").hide();
+				$("#errorDiv").hide();
+
+				function alertError(spanid, errorMessage) {
+
+					$("#" + spanid).html(errorMessage);
+
+					return false;
+				}
+
+				function removeError() {
+					$("#errorDiv").html("");
+					$("#errorDiv").hide();
+					return false;
+				}
+
+				function validateSignUp(username, password, confirm_password, email) {
+					var flag = true;
+					if(username.length < MIN_LENGTH_USERNAME) {
+						$("#span_sign_up_username").text("Must be atleast " + MIN_LENGTH_USERNAME + " characters");
+						$("#sign_up_username").addClass("error");
+						flag = false;
+					} else if(username.length > MAX_LENGTH_USERNAME) {
+						$("#span_sign_up_username").text("Must be atmost " + MAX_LENGTH_USERNAME + " characters");
+						$("#sign_up_username").addClass("error");
+						flag = false;
+					} else {
+						$("#span_sign_up_username").text("");
+						var receivedData;
+
+						$("#sign_up_username").removeClass("error")
+					}
+					if(password.length < MIN_LENGTH_PASSWORD) {
+						$("#span_sign_up_password").text("Must be atleast " + MIN_LENGTH_PASSWORD + " characters");
+						$("#sign_up_password").addClass("error");
+						flag = false;
+					} else if(password.length > MAX_LENGTH_PASSWORD) {
+						$("#span_sign_up_password").text("Must be atmost " + MAX_LENGTH_PASSWORD + " characters");
+						$("#sign_up_password").addClass("error");
+						flag = false;
+					} else {
+						$("#span_sign_up_password").text("");
+						$("#sign_up_password").removeClass("error")
+					}
+					if(confirm_password != password) {
+						$("#span_sign_up_confirmation").text("Must be same as password");
+						$("#sign_up_confirmation").addClass("error");
+						flag = false;
+					} else {
+						$("#span_sign_up_confirmation").text("");
+						$("#sign_up_confirmation").removeClass("error")
+					}
+					if((!emailReg.test(email)) || (email.length == 0)) {
+						$("#span_sign_up_email").text("Invalid Email Id");
+						$("#sign_up_email").addClass("error");
+						flag = false;
+
+					} else {
+						$("#span_sign_up_email").text("");
+						$("#sign_up_email").removeClass("error")
+					}
+
+					return flag;
+				}
+
+
+				$("#sign_up_confirmation").keyup(function() {
+					if($(this).val() != $("#sign_up_password").val()) {
+						$('#span_sign_up_confirmation').text("Passwords don't match.");
+					} else {
+						$('#span_sign_up_confirmation').text("");
+					}
+				});
+
+				$("#sign_in_username").keypress(function(e) {
+					if(e.keyCode == 13) {
+
+						$('#sign_in_submit').click();
+					}
+				});
+
+				$('#sign_in_password').keypress(function(e) {
+					if(e.keyCode == 13) {
+
+						$('#sign_in_submit').click();
+					}
+
+				});
+
+				$('.sign_up').keypress(function(e) {
+					if(e.keyCode == 13) {
+						$('#sign_up_submit').click();
+					}
+				});
+
+				$("#sign_in_submit").click(function() {
+					sign_in_username = $("#sign_in_username").val();
+					sign_in_password = $("#sign_in_password").val();
+					//sign_in_validation_state = validateSignIn(sign_in_username, sign_in_password);
+					//if(sign_in_validation_state) {
+					var sign_in = {};
+					sign_in[USERNAME] = sign_in_username;
+					sign_in[PASSWORD] = sign_in_password;
+					//Submit the login details
+
+					//Add Noty to top indicating Loading
+					showNoty("Loading...", "topCenter", false);
+
+					try {
+						$.post("login", JSON.stringify(sign_in), function(data) {
+							responseFromServer = data;
+
+						});
+						if((responseFromServer[RESPONSE_STATUS_CODE]) == 0) {
+							window.location = URL_HOME;
+
+						} else {
+							$.noty.closeAll()
+							if(responseFromServer[RESPONSE_MESSAGE] == 'com.google.gson.JsonParseException: Expecting object found: "<!DOCTYPE"')
+								alert("SensorAct server has not been started or is incorrectly configured. Please contact the administrator.");
+							else
+								alertError('sign_in_error', responseFromServer[RESPONSE_MESSAGE]);
+						}
+
+					} catch(e) {
+						$.noty.closeAll();
+						alertError('sign_in_error', e);
+					}
+					//}
+
+				});
+				$("#sign_up_submit").click(function() {
+					sign_up_username = $("#sign_up_username").val();
+					sign_up_password = $("#sign_up_password").val();
+					sign_up_confirmation = $("#sign_up_confirmation").val();
+					sign_up_email = $("#sign_up_email").val();
+					sign_up_validation_state = validateSignUp(sign_up_username, sign_up_password, sign_up_confirmation, sign_up_email);
+					if(sign_up_validation_state) {
+						var sign_up = {};
+						sign_up[USERNAME] = sign_up_username;
+						sign_up[PASSWORD] = sign_up_password;
+						sign_up[EMAIL] = sign_up_email;
+						//alert(JSON.stringify(sign_up));
+						//Submit the login details
+						showNoty("Registering...", "topCenter", false);
+
+						try {
+
+							$.post("register", JSON.stringify(sign_up), function(data) {
+								responseFromServer = data;
+
+							});
+							if((responseFromServer[RESPONSE_STATUS_CODE] != 0)) {
+								alertError("span_error","Following error occured " + responseFromServer[RESPONSE_MESSAGE]);
+								$.noty.closeAll();
+
+							} else {
+								removeError();
+								window.location = URL_UI_SERVER + "home";
+
+							}
+
+						} catch(e) {
+							$.noty.closeAll();
+							alertError("span_error",e);
+						}
+											}
+
+				});
+			});
+
+		</script>
+	</head>
+	<body>
+		<div id="header-container">
+			<header class="wrapper clearfix">
+				<h2 id="title">
+				<!--<div style="margin-top:-15%;"><img src="@{'/public/images/logo.png'}" width="120px" height="100px" />&nbsp
+				<img src="@{'/public/images/uclaa.png'}" width="160px" height="70px" /></div><br />-->
+				SensorAct
+				<br />
+				<br />
+				<span style="font-size:25px;">Sense - Interact - Actuate</span><br />
+				</h2>
+				<nav>
+					<p class="loginbox">
+						<label for="sign_in_username">Username</label>
+						<input type="text" size="10" name="sign_in_username" id="sign_in_username" />
+						<br />
+						<br />
+						<label for="sign_in_password">Password</label>
+						<input type="password" size="10" name="sign_in_password" id="sign_in_password" />
+						<br />
+						<br />
+						<span id="sign_in_error"></span>
+					</p>
+					<ul>
+						<li>
+							<a style="float:right; height: 20px; width:17%;" name="sign_in_submit" href="#" id="sign_in_submit">Sign In</a>
+						</li>
+					</ul>
+				</nav>
+			</header>
+		</div>
+		<div id="main-container">
+			<div id="main" class="wrapper clearfix">
+				<article>
+					<header>
+						<h1 class="newfont">Introducing SensorAct Project</h1>
+						<hr>
+						<!--<video controls="controls"  poster="big-buck-bunny_poster.jpg" width="420" height="315">
+							<source src="@{'public/videos/big_buck_bunny.mp4'}" type="video/mp4" />
+							<source src="@{'public/videos/big_buck_bunny.webm'}" type="video/webm" />
+							<source src="@{'public/videos/big_buck_bunny.ogv'}" type="video/ogg" />
+							<object type="application/x-shockwave-flash" data="http://releases.flowplayer.org/swf/flowplayer-3.2.1.swf" width="420" height="315">
+								<param name="movie" value="http://releases.flowplayer.org/swf/flowplayer-3.2.1.swf" />
+								<param name="allowFullScreen" value="true" />
+								<param name="wmode" value="transparent" />								
+								<img alt="Big Buck Bunny" src="@{'public/images/big-buck-bunny_poster.jpg'}" width="420" height="315" title="No video playback capabilities, please download the video below" />
+							</object>
+						</video>
+						<p>
+							<strong>Download video:</strong><a href="@{'public/videos/big_buck_bunny.mp4'}">MP4 format</a> | <a href="@{'public/videos/big_buck_bunny.ogv'}">Ogg format</a> | <a href="@{'public/videos/big_buck_bunny.webm'}">WebM format</a>
+						</p>-->
+						<!--  video controls="controls"
+						class="video-stream"
+						x-webkit-airplay="allow"
+						data-youtube-id="cFAV5jNvQwg"
+						src="http://www.youtube.com/watch?v=cFAV5jNvQwg&feature=b-mv"></video>
+						-->
+						<!-- iframe width="420" height="315" src="http://www.youtube.com/embed/cFAV5jNvQwg" frameborder="0" allowfullscreen></iframe-->
+					</header>
+				</article>
+				<br />
+				<aside>
+					<h2 class="newfont"><b>Register</b></h2>
+					<label for="sign_up_username">Username</label>
+					<input type="text" name="sign_up_username" class="sign_up" size="15" id="sign_up_username" />
+					<label></label>
+					<span id="span_sign_up_username"></span>
+					<br />
+					<label for="sign_up_password">Password</label>
+					<input type="password" name="sign_up_password" class="sign_up" size="15" id="sign_up_password" />
+					<label></label>
+					<span id="span_sign_up_password"></span>
+					<br />
+					<label for="sign_up_confirmation">Password</label>
+					<input type="password" name="sign_up_confirmation" class="sign_up" size="15" id="sign_up_confirmation" />
+					<label></label>
+					<span id="span_sign_up_confirmation"></span>
+					<br />
+					<label for="sign_up_email">Email ID</label>
+					<input type="input" name="sign_up_email" size="15" class="sign_up" id="sign_up_email" />
+					<label></label>
+					<span id="span_sign_up_email"></span>
+					<br />
+					<span id="span_error"></span>					
+					<nav>
+						<p class="loginbox">
+							<label name="sign_up_submit" id ="sign_up_submit" class="buttons"> Sign Up </label>
+						</p>
+					</nav>
+				</aside><br/>
+				<article>
+				<footer>
+				<p>Smart Rooms</p>
+				<p>A Novel approach to integrate the physical and the cyber world.</p>
+				<p>Sensors And Actuators</p>
+
+				</footer>
+				</article>
+				</div> <!-- #main -->
+				</div> <!-- #main-container -->
+
+				<div style="clear:both;" id="footer-container">
+				<footer class="wrapper">
+					<h4 align="center"><img src="@{'/public/images/logo.png'}" width="100px" height="70px" />&nbsp
+				<img src="@{'/public/images/uclaa.png'}" width="160px" height="40px" />
+				<font size="+1">Special Thanks to DeITy and NSF for funding</font></h4>
+				</footer>
+				</div>
+
+				</body>
+
+				</html>
